@@ -431,3 +431,193 @@ body {
   .lang-btn { display: inline-block; }
 }
 
+/* ======================================================
+   明暗主题切换
+   - 根元素 html[data-theme="dark|light"] 控制整套配色
+   - 默认(无 data-theme,JS 挂了)按暗色处理
+   ====================================================== */
+
+/* ---- 主题切换按钮(右上角,玻璃胶囊圆形) ---- */
+.theme-btn {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  right: 16px;
+  z-index: 8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: transform .18s cubic-bezier(.34, 1.56, .64, 1),
+              background .18s ease,
+              border-color .18s ease;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.theme-btn:hover {
+  background: rgba(255, 255, 255, 0.20);
+  border-color: rgba(255, 255, 255, 0.42);
+}
+.theme-btn:active { transform: scale(.94); }
+.theme-btn:focus {
+  outline: 2px solid #5ce0ff;
+  outline-offset: 2px;
+}
+.theme-icon {
+  display: none;
+  pointer-events: none;
+}
+/* 暗色(默认)状态显示太阳☀:点击切亮 */
+.theme-sun,
+html[data-theme="dark"] .theme-sun { display: inline; }
+html[data-theme="light"] .theme-sun { display: none; }
+/* 亮色状态显示月亮☾:点击切暗 */
+html[data-theme="light"] .theme-moon { display: inline; }
+
+/* 小屏:按钮略缩 */
+@media (max-width: 520px) {
+  .theme-btn {
+    width: 40px;
+    height: 40px;
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    right: 12px;
+    font-size: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-btn, .theme-btn:hover, .theme-btn:active { transition: none; }
+}
+
+/* ---- 亮色主题:整体配色覆盖 ----
+   单一蓝色系渐变(青→天蓝→浅白),不混互补色相(蓝+粉会发灰);
+   彩色交给前景彩圈当点缀 */
+html[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, 0) 62%),
+    radial-gradient(ellipse 55% 45% at 82% 22%, rgba(150, 205, 245, .55) 0%, rgba(150, 205, 245, 0) 55%),
+    radial-gradient(ellipse 60% 50% at 18% 80%, rgba(165, 190, 242, .5) 0%, rgba(165, 190, 242, 0) 55%),
+    linear-gradient(200deg, #93bce8 0%, #b9d4f0 45%, #e9f1fb 100%);
+}
+
+/* 光斑:亮底上降低浓度,与柔和底融合 */
+html[data-theme="light"] .blob { opacity: .55; }
+
+/* 玻璃字:亮底上转成"深色玻璃",白色 rim 变成受光高光 */
+html[data-theme="light"] #body stop:nth-child(1) { stop-color: #14325f; stop-opacity: .68; }
+html[data-theme="light"] #body stop:nth-child(2) { stop-color: #1f4580; stop-opacity: .52; }
+html[data-theme="light"] #body stop:nth-child(3) { stop-color: #2c5698; stop-opacity: .42; }
+html[data-theme="light"] #body stop:nth-child(4) { stop-color: #4070b8; stop-opacity: .50; }
+html[data-theme="light"] #rimGrad stop:nth-child(2) { stop-color: #ffffff; stop-opacity: .9; }
+html[data-theme="light"] #rimGrad stop:nth-child(4) { stop-color: #ffffff; stop-opacity: .65; }
+html[data-theme="light"] #edgeLine stop:nth-child(1) { stop-color: #ffffff; stop-opacity: .9; }
+html[data-theme="light"] #edgeLine stop:nth-child(3) { stop-color: #cdd9f2; stop-opacity: .7; }
+
+/* 文字与控件配色:对齐 kk-tools 的 #1a3a6b / rgba(50,70,110,*) 柔和系 */
+html[data-theme="light"] .subtitle {
+  color: rgba(50, 70, 110, .8);
+  text-shadow: 0 1px 8px rgba(255, 255, 255, .35);
+}
+html[data-theme="light"] .stats,
+html[data-theme="light"] .stats-count,
+html[data-theme="light"] .stars-count { color: rgba(50, 70, 110, .78); }
+html[data-theme="light"] .stats-count,
+html[data-theme="light"] .stars-count { color: #1a3a6b; }
+html[data-theme="light"] .stats-count[title],
+html[data-theme="light"] .stars-count[title] { color: rgba(50, 70, 110, .5); }
+
+html[data-theme="light"] .boost {
+  color: #1a3a6b;
+  background: rgba(255, 255, 255, .4);
+  border-color: rgba(255, 255, 255, .8);
+  box-shadow:
+    0 4px 14px rgba(40, 60, 110, .12),
+    inset 0 1px 0 rgba(255, 255, 255, .85);
+}
+html[data-theme="light"] .boost:hover {
+  background: rgba(255, 255, 255, .65);
+  border-color: rgba(255, 255, 255, .95);
+}
+html[data-theme="light"] .boost:focus { outline-color: #4a6fa8; }
+
+html[data-theme="light"] .lang-switch {
+  background: rgba(255, 255, 255, .32);
+  border-color: rgba(255, 255, 255, .75);
+  box-shadow:
+    0 4px 14px rgba(40, 60, 110, .10),
+    inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+html[data-theme="light"] .lang-btn { color: rgba(50, 70, 110, .75); }
+html[data-theme="light"] .lang-btn:hover { color: #1a3a6b; }
+html[data-theme="light"] .lang-btn[aria-pressed="true"] {
+  background: linear-gradient(135deg, rgba(255, 255, 255, .9), rgba(220, 230, 250, .7));
+  color: #1a3a6b;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 1px 5px rgba(40, 60, 110, .15);
+}
+html[data-theme="light"] .lang-btn:focus-visible { outline-color: #4a6fa8; }
+
+html[data-theme="light"] .tools-btn {
+  color: #1a3a6b;
+  background: rgba(255, 255, 255, .4);
+  border-color: rgba(255, 255, 255, .8);
+  box-shadow:
+    0 4px 12px rgba(40, 60, 110, .10),
+    inset 0 1px 0 rgba(255, 255, 255, .85);
+}
+html[data-theme="light"] .tools-btn:hover {
+  background: rgba(255, 255, 255, .65);
+  border-color: rgba(255, 255, 255, .95);
+}
+
+html[data-theme="light"] .theme-btn {
+  color: #1a3a6b;
+  background: rgba(255, 255, 255, .4);
+  border-color: rgba(255, 255, 255, .8);
+  box-shadow:
+    0 4px 12px rgba(40, 60, 110, .10),
+    inset 0 1px 0 rgba(255, 255, 255, .85);
+}
+html[data-theme="light"] .theme-btn:hover {
+  background: rgba(255, 255, 255, .68);
+  border-color: rgba(255, 255, 255, .95);
+}
+html[data-theme="light"] .theme-btn:focus { outline-color: #4a6fa8; }
+
+html[data-theme="light"] .site-foot { color: rgba(50, 70, 110, .5); }
+
+html[data-theme="light"] .skip-link {
+  background: #cdd7ea;
+  color: #1a3a6b;
+  border-color: #4a6fa8;
+}
+
+/* 亮色下的涟漪:白色太淡,换柔和的蓝 */
+html[data-theme="light"] .ripple {
+  background: radial-gradient(circle,
+      rgba(110, 150, 255, 0) 18%,
+      rgba(110, 150, 255, .4) 34%,
+      rgba(110, 150, 255, 0) 58%);
+}
+html[data-theme="light"] .ripple::after {
+  background: radial-gradient(circle,
+      rgba(110, 150, 255, 0) 40%,
+      rgba(90, 140, 255, .28) 62%,
+      rgba(110, 150, 255, 0) 78%);
+}
+
+

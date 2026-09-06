@@ -52,7 +52,9 @@
 
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="alternate icon" href="data:," />
-  <link rel="stylesheet" href="assets/style.css?v=5" />
+  <!-- 主题初始化:须在样式表之前执行,避免首帧明暗闪烁 -->
+  <script src="assets/theme.js?v=6"></script>
+  <link rel="stylesheet" href="assets/style.css?v=9" />
   <!-- IE 专用 fallback:用 flexbox 替 grid、纯色替毛玻璃、移除 min()/env() -->
   <!--[if IE]>
   <link rel="stylesheet" href="assets/ie.css" />
@@ -161,6 +163,12 @@
     </div>
   </div>
   <p class="subtitle" data-zh="@ZCH-KK 的个人主页" data-en="ZCH-KK's personal playground">@ZCH-KK 的个人主页</p>
+  <button type="button" class="theme-btn" id="theme-toggle"
+          aria-label="切换到亮色模式" aria-pressed="false"
+          title="切换到亮色模式">
+    <span class="theme-icon theme-sun" aria-hidden="true">☀</span>
+    <span class="theme-icon theme-moon" aria-hidden="true">☾</span>
+  </button>
   </main>
 
   <aside class="tools-rail" aria-label="子站导航">
@@ -189,7 +197,7 @@
   <footer class="site-foot" role="contentinfo">
     <small class="foot-line" data-zh="© 2026 ZCH-KK · MIT" data-en="© 2026 ZCH-KK · MIT">© 2026 ZCH-KK · MIT</small>
   </footer>
-  <script src="assets/main.js?v=5" defer></script>
+  <script src="assets/main.js?v=6" defer></script>
   <script src="assets/lang.js" defer></script>
   <!--[if IE]>
   <script src="assets/ie-polyfills.js" defer></script>
