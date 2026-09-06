@@ -33,6 +33,82 @@
       }
     }
 
+    // 当前是否亮色主题
+    function glassIsLight() {
+      var r = document.documentElement;
+      return r ? r.getAttribute('data-theme') === 'light' : false;
+    }
+    // ===== 点击彩蛋:彩色柔光迸溅(光穿过液态玻璃的光斑,呼应背景彩圈) =====
+    function spawnMcBits(x, y) {   // 沿用旧名,内部已是柔光迸溅
+      if (document.hidden) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var light = glassIsLight();
+      // 与背景彩圈同色系:粉/青/金/绿 + 冰蓝
+      var RGB = [[255,126,217],[92,224,255],[255,226,122],[138,255,193],[170,210,255]];
+      var aBase = light ? 0.62 : 0.33;   // 亮底略浓;暗底调暗,避免刺眼
+      var motes = [];
+      var n = 7 + ((Math.random() * 5) | 0);
+      var i;
+      for (i = 0; i < n; ++i) {
+        var el = document.createElement('div');
+        var c = RGB[(Math.random() * RGB.length) | 0];
+        var size = 34 + Math.random() * 44;
+        var ang = Math.random() * Math.PI * 2;
+        var spd = 0.35 + Math.random() * 0.9;
+        var a = aBase * (0.7 + Math.random() * 0.5);
+        el.style.position = 'fixed';
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+        el.style.borderRadius = '50%';
+        el.style.background = 'radial-gradient(circle, rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + Math.min(1, a * 1.7) + ') 0%, rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ') 42%, rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',0) 70%)';
+        el.style.pointerEvents = 'none';
+        el.style.zIndex = '10';
+        el.style.willChange = 'transform, opacity';
+        document.body.appendChild(el);
+        motes.push({
+          el: el,
+          x: 0, y: 0,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd - 0.35,
+          s0: 0.5 + Math.random() * 0.5,
+          s1: 1.4 + Math.random() * 0.8,
+          life: 0,
+          maxLife: 680 + Math.random() * 320
+        });
+      }
+      var last = 0;
+      function frame(ts) {
+        if (!last) last = ts;
+        var dt = Math.min(48, ts - last);
+        last = ts;
+        var f = dt / 16.7;
+        var alive = false;
+        var k;
+        for (k = 0; k < motes.length; ++k) {
+          var m = motes[k];
+          m.life += dt;
+          if (m.life >= m.maxLife) {
+            if (m.el.parentNode) m.el.parentNode.removeChild(m.el);
+            continue;
+          }
+          alive = true;
+          var t = m.life / m.maxLife;
+          m.x += m.vx * f;
+          m.y += m.vy * f;
+          var ease = 1 - (1 - t) * (1 - t);          // 缓出:先快后慢
+          var sc = m.s0 + (m.s1 - m.s0) * ease;
+          var op = t < 0.35 ? 1 : (1 - (t - 0.35) / 0.65);   // 后段淡出
+          m.el.style.transform = 'translate(' + m.x + 'px,' + m.y + 'px) ' +
+            'translate(-50%,-50%) scale(' + sc + ')';
+          m.el.style.opacity = String(Math.max(0, op));
+        }
+        if (alive) window.requestAnimationFrame(frame);
+      }
+      if (window.requestAnimationFrame) window.requestAnimationFrame(frame);
+    }
+
     // 父级类名匹配(用 ES5 字符串方法代替 classList.contains)
     function hasClass(node, cls) {
       if (!node || !node.className || typeof node.className !== 'string') return false;
@@ -57,6 +133,7 @@
       }
       if (typeof x !== 'number' || typeof y !== 'number') return;
       spawnRipple(x, y);
+      spawnMcBits(x, y);
     }
 
     glass.addEventListener('click', onTap);
