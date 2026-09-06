@@ -621,3 +621,308 @@ html[data-theme="light"] .ripple::after {
 }
 
 
+
+/* ======================================================
+   C 组新增:小游戏「捞流光」浮层
+   - .game-shell 全屏遮罩(毛玻璃)
+   - .game-panel 液态玻璃卡片(透明 + 亮折射边缘,呼应主页 kk 字)
+   - 画布内的一切都画在 <canvas> 上,不引外链、不破 CSP
+   ====================================================== */
+.game-shell {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 40;                /* 必须盖过 .tools-rail(5) / .theme-btn(8) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4vh 16px;
+  background: rgba(3, 8, 20, 0.45);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-tap-highlight-color: transparent;
+}
+.game-shell[hidden] { display: none; }
+
+.game-panel {
+  position: relative;
+  width: min(560px, 96vw);
+  height: min(620px, 82vh);
+  min-height: 360px;
+  border-radius: 30px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* 液态玻璃卡片:半透明渐变体 + 白亮边缘 + 内高光 */
+  background:
+    linear-gradient(168deg,
+      rgba(255,255,255,0.16) 0%,
+      rgba(255,255,255,0.06) 42%,
+      rgba(180,220,255,0.10) 100%);
+  border: 1px solid rgba(255,255,255,0.38);
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255,255,255,0.45),
+    inset 0 -1px 0 rgba(255,255,255,0.12);
+}
+
+/* ============ 顶部 HUD ============ */
+.game-hud {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.16);
+  color: rgba(255,255,255,0.95);
+}
+.game-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-shadow: 0 1px 10px rgba(255,255,255,0.25);
+}
+.game-title .glow-ico {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, #fff 0%, #5ce0ff 46%, rgba(92,224,255,0) 74%);
+  box-shadow: 0 0 12px rgba(92,224,255,0.8);
+  display: inline-block;
+}
+.game-hearts {
+  display: inline-flex;
+  gap: 4px;
+  margin-right: 6px;
+}
+.game-hearts .h {
+  font-style: normal;
+  font-size: 17px;
+  line-height: 1;
+  color: rgba(255,255,255,0.92);
+  filter: drop-shadow(0 0 6px rgba(255,120,180,0.8));
+  transition: opacity .2s, transform .2s;
+}
+.game-hearts .h.off {
+  color: rgba(255,255,255,0.22);
+  filter: none;
+  transform: scale(.9);
+}
+.game-score {
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  min-width: 54px;
+  text-align: right;
+  text-shadow: 0 0 14px rgba(120,220,255,0.55);
+}
+.game-hud-btn {
+  flex: 0 0 auto;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: background .18s, transform .15s, border-color .18s;
+  -webkit-tap-highlight-color: transparent;
+}
+.game-hud-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.55); }
+.game-hud-btn:active { transform: scale(.9); }
+.game-hud-btn:focus { outline: 2px solid #5ce0ff; outline-offset: 2px; }
+
+/* ============ 画布区 ============ */
+.game-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.game-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;          /* 移动端:手指滑动只控碗,不滚页面 */
+  cursor: crosshair;
+}
+
+/* ============ 封面 / 结算浮层 ============ */
+.game-cover {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  background: radial-gradient(ellipse 90% 70% at 50% 45%,
+      rgba(6, 12, 28, 0.62) 0%,
+      rgba(6, 12, 28, 0.35) 60%,
+      rgba(6, 12, 28, 0.5) 100%);
+}
+.game-cover[hidden] { display: none; }
+.game-cover-tip {
+  font-size: clamp(13px, 1.4vw, 15px);
+  line-height: 1.75;
+  color: rgba(255,255,255,0.92);
+  max-width: 420px;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+}
+.game-cover-title {
+  font-size: clamp(26px, 5vw, 40px);
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #fff;
+  text-shadow: 0 0 26px rgba(120,220,255,0.6);
+}
+.game-result-line {
+  font-size: clamp(15px, 2vw, 18px);
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+  font-variant-numeric: tabular-nums;
+}
+.game-newbest {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffe27a;
+  text-shadow: 0 0 14px rgba(255,226,122,0.7);
+  animation: nbestPop .7s ease both;
+}
+@keyframes nbestPop {
+  0%   { transform: scale(.4); opacity: 0; }
+  55%  { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.game-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+.game-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 999px;
+  padding: 12px 30px;
+  min-height: 46px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), background .18s, border-color .18s;
+  -webkit-tap-highlight-color: transparent;
+}
+.game-btn:hover { transform: translateY(-2px); }
+.game-btn:active { transform: scale(.95); }
+.game-btn:focus { outline: 2px solid #5ce0ff; outline-offset: 3px; }
+
+/* 主按钮:亮白玻璃胶囊 */
+.game-btn-primary {
+  color: #06203d;
+  background: linear-gradient(160deg, #eaf6ff 0%, #bfe0ff 60%, #9fd0ff 100%);
+  border: 1px solid rgba(255,255,255,0.9);
+  box-shadow: 0 8px 30px rgba(60,180,255,0.35), inset 0 1px 0 #fff;
+}
+/* 次按钮:透明玻璃 */
+.game-btn-ghost {
+  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.game-btn-ghost:hover { background: rgba(255,255,255,0.22); }
+
+/* ============ 亮色主题适配 ============ */
+html[data-theme="light"] .game-shell {
+  background: rgba(230, 240, 252, 0.5);
+}
+html[data-theme="light"] .game-panel {
+  background:
+    linear-gradient(168deg,
+      rgba(255,255,255,0.72) 0%,
+      rgba(255,255,255,0.42) 46%,
+      rgba(210,230,252,0.5) 100%);
+  border-color: rgba(255,255,255,0.95);
+  box-shadow:
+    0 30px 90px rgba(40, 70, 140, 0.35),
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 rgba(255,255,255,0.6);
+}
+html[data-theme="light"] .game-hud {
+  border-bottom-color: rgba(60, 90, 150, 0.18);
+  color: #14325f;
+}
+html[data-theme="light"] .game-title { text-shadow: 0 1px 10px rgba(255,255,255,0.6); }
+html[data-theme="light"] .game-hearts .h { color: #d8447a; filter: drop-shadow(0 0 5px rgba(216,68,122,0.5)); }
+html[data-theme="light"] .game-hearts .h.off { color: rgba(40, 70, 120, 0.25); }
+html[data-theme="light"] .game-score { text-shadow: 0 0 14px rgba(60,150,255,0.35); }
+html[data-theme="light"] .game-hud-btn {
+  color: #1a3a6b;
+  background: rgba(255,255,255,0.5);
+  border-color: rgba(255,255,255,0.9);
+}
+html[data-theme="light"] .game-hud-btn:hover { background: rgba(255,255,255,0.85); }
+html[data-theme="light"] .game-cover {
+  background: radial-gradient(ellipse 90% 70% at 50% 45%,
+      rgba(233, 241, 251, 0.85) 0%,
+      rgba(233, 241, 251, 0.55) 60%,
+      rgba(233, 241, 251, 0.7) 100%);
+}
+html[data-theme="light"] .game-cover-tip { color: #1a3a6b; text-shadow: none; }
+html[data-theme="light"] .game-cover-title { color: #14325f; text-shadow: 0 0 26px rgba(255,255,255,0.7); }
+html[data-theme="light"] .game-result-line { color: #1a3a6b; }
+html[data-theme="light"] .game-newbest { color: #c98a00; }
+html[data-theme="light"] .game-btn-ghost {
+  color: #1a3a6b;
+  background: rgba(255,255,255,0.55);
+  border-color: rgba(255,255,255,0.95);
+}
+html[data-theme="light"] .game-btn-ghost:hover { background: rgba(255,255,255,0.9); }
+html[data-theme="light"] .game-btn-primary {
+  color: #06203d;
+  background: linear-gradient(160deg, #ffffff 0%, #cfe6ff 55%, #b4d8ff 100%);
+  border-color: #fff;
+}
+html[data-theme="light"] .game-btn:focus { outline-color: #4a6fa8; }
+
+/* ============ 小屏 / 横屏适配 ============ */
+@media (max-width: 480px) {
+  .game-panel { height: min(560px, 84vh); border-radius: 24px; }
+  .game-hud { padding: 10px 12px 8px; gap: 8px; }
+  .game-title { font-size: 15px; }
+  .game-score { font-size: 19px; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-shell { padding: 2vh 8px; }
+  .game-panel { height: 94vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-btn, .game-hud-btn { transition: none; }
+  .game-newbest { animation: none; }
+}
+
+/* ======================================================
+   tools-rail 里的按钮版本(游戏入口):和 <a> 版视觉一致
+   ====================================================== */
+.tools-btn.game-open {
+  font: inherit;              /* button 默认不继承 font,补上 */
+  text-align: center;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  color: rgba(220, 235, 255, 0.92);
+  letter-spacing: 0.5px;
+}
+html[data-theme="light"] .tools-btn.game-open { color: #1a3a6b; }
+/* 窄屏时文字隐藏规则对按钮同样生效(基础 .tools-btn 已有,保持字体) */

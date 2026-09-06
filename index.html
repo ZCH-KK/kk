@@ -54,7 +54,7 @@
   <link rel="alternate icon" href="data:," />
   <!-- 主题初始化:须在样式表之前执行,避免首帧明暗闪烁 -->
   <script src="assets/theme.js?v=6"></script>
-  <link rel="stylesheet" href="assets/style.css?v=9" />
+  <link rel="stylesheet" href="assets/style.css?v=10" />
   <!-- IE 专用 fallback:用 flexbox 替 grid、纯色替毛玻璃、移除 min()/env() -->
   <!--[if IE]>
   <link rel="stylesheet" href="assets/ie.css" />
@@ -192,12 +192,67 @@
       <span class="tools-glyph" aria-hidden="true">⚙</span>
       <span class="tools-label">进入工具箱 →</span>
     </a>
+    <button type="button" class="tools-btn" id="game-open"
+            title="捞流光 · 接住光球 / Catch the Glow"
+            aria-label="捞流光 · 接住光球 / Catch the Glow">
+      <span class="tools-glyph" aria-hidden="true">✦</span>
+      <span class="tools-label" data-zh="小游戏" data-en="Game">小游戏</span>
+    </button>
   </aside>
 
   <footer class="site-foot" role="contentinfo">
     <small class="foot-line" data-zh="© 2026 ZCH-KK · MIT" data-en="© 2026 ZCH-KK · MIT">© 2026 ZCH-KK · MIT</small>
   </footer>
+
+  <!-- ===== 小游戏「捞流光」浮层(液态玻璃卡片,canvas 无外链) ===== -->
+  <div class="game-shell" id="game-shell" hidden
+       role="dialog" aria-modal="true"
+       aria-label="捞流光 · Catch the Glow">
+    <div class="game-panel">
+      <div class="game-hud">
+        <span class="game-title">
+          <span class="glow-ico" aria-hidden="true"></span>
+          <span data-zh="捞流光" data-en="Catch the Glow">捞流光</span>
+        </span>
+        <span class="game-hearts" id="game-hearts" aria-label="lives">
+          <i class="h on" aria-hidden="true">♥</i><i class="h on" aria-hidden="true">♥</i><i class="h on" aria-hidden="true">♥</i>
+        </span>
+        <span class="game-score" id="game-score-n" aria-label="score">0</span>
+        <button type="button" class="game-hud-btn" id="game-snd"
+                aria-label="音效开 / Sound on" title="音效开 / Sound on">🔊</button>
+        <button type="button" class="game-hud-btn" id="game-close"
+                aria-label="关闭游戏 / Close game" title="Esc">✕</button>
+      </div>
+      <div class="game-stage">
+        <canvas class="game-canvas" id="game-canvas"></canvas>
+
+        <!-- 开场封面 -->
+        <div class="game-cover" id="game-cover">
+          <p class="game-cover-tip"
+             data-zh="移动鼠标或手指,让玻璃碗接住坠落的光球:彩球 +1 · 金球 +5 · 暗刺球千万别接!漏一颗球扣 1 颗心,共 3 颗心。"
+             data-en="Move your mouse or finger to catch falling orbs with the glass bowl: orbs +1 · golden +5 · dodge the spiky dark ones! Each miss costs one heart — you have 3."></p>
+          <button type="button" class="game-btn game-btn-primary" id="game-start"
+                  data-zh="开始" data-en="Start">开始</button>
+        </div>
+
+        <!-- 结算 -->
+        <div class="game-cover" id="game-result" hidden>
+          <p class="game-cover-title" data-zh="流光散去啦" data-en="Glow's gone">流光散去啦</p>
+          <p class="game-result-line" id="result-score"></p>
+          <p class="game-newbest" id="result-best" hidden></p>
+          <div class="game-btns">
+            <button type="button" class="game-btn game-btn-primary" id="game-again"
+                    data-zh="再来一局" data-en="Play again">再来一局</button>
+            <button type="button" class="game-btn game-btn-ghost" id="game-exit"
+                    data-zh="退出" data-en="Exit">退出</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/main.js?v=13" defer></script>
+  <script src="assets/game.js?v=1" defer></script>
   <script src="assets/lang.js" defer></script>
   <!--[if IE]>
   <script src="assets/ie-polyfills.js" defer></script>

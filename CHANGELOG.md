@@ -12,6 +12,7 @@
 - `robots.txt` + `sitemap.xml`
 - `assets/og.png` 社交分享预览图（Open Graph）
 - `favicon.svg` 替换原来的 data: 零字节图标
+- 小游戏「捞流光 / Catch the Glow」:右侧 ✦ 入口,液态玻璃浮层内接住坠落光球(彩球+1/金球+5/暗刺球扣心),3 心制 + 最高分记录,鼠标/触屏/键盘可玩,WebAudio 合成音效可关,明暗自适应(`?demo=1/2/3` 预览封面/开局/结算)
 
 ## [1.0.0] - 2026-09-04
 
